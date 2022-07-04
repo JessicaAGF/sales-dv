@@ -26,14 +26,12 @@ class Sale(models.Model):
     zone = models.CharField(max_length=50)
     waiter = models.CharField(max_length=200)
     cashier = models.CharField(max_length=200)
-    products = models.ManyToManyField(Product)
     diners = models.IntegerField()
     opened = models.DateTimeField()
     table = models.IntegerField()
     total = models.IntegerField()
-    id = models.CharField(max_length=200)
-    payments = models.ManyToManyField(Payment)
+    sale_id = models.CharField(max_length=200, primary_key=True)
 
     def __str__(self):
-        return self.id
+        return self.sale_id
 
