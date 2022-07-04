@@ -1,13 +1,19 @@
 {% extends 'comp/base.html' %}
 {% block content %}
-    <div class="hbox" style="width:50%; height:50%">
+    <h1 class="hbox" id="title" style="align-content: center; padding: 10px; font-size: 30px"></h1>
+    <div class="hbox" style="display: block; padding:10px; background-color: ghostwhite; width:40%; height:40% ; border-radius: 5px">
         <canvas id="myChart" width="400" height="400"></canvas>
+        <canvas id="myChart2" width="400" height="400"></canvas>
         <script language="JavaScript">
         const queryString = window.location.search;
         const urlParams = new URLSearchParams(queryString);
-        const graph = urlParams.get('graph')
+        const graph = urlParams.get('graph');
         const ctx = document.getElementById('myChart');
-        if(graph.toString() == "productFrequency"){
+        const ctx2 = document.getElementById('myChart2');
+        const title = document.getElementById('title');
+
+        if(graph.toString() == "product"){
+            title.innerHTML = 'Frecuencia de producto histórico'
 
             var rgb= []
             for(var i=0;i<{{ len1 }}; i++){
@@ -29,9 +35,25 @@
             };
             const myChart = new Chart(ctx,config);
 
+            const data2 = {
+              labels: [{% for p in product_income %}'{{ p.name }}',{% endfor %}],
+              datasets: [{
+                label: 'Frecuencia de platos histórico',
+                data: [{% for p in product_income %}'{{ p.qtt }}',{% endfor %}],
+                backgroundColor: rgb,
+                hoverOffset: 4
+              }]
+            };
+            const config2 = {
+              type: 'doughnut',
+              data: data2,
+            };
+            const myChart2 = new Chart(ctx2,config2);
+
         }
 
-        else if(graph.toString() == "incomePerMonth"){
+        else if(graph.toString() == "income"){
+            title.innerHTML = 'Ingreso mensual histórico';
             var rgb= [];
             for(var i=0;i<{{ len2 }}; i++){
                 let str = 'rgb('+ Math.floor(Math.random() * 256).toString() +', ' + Math.floor(Math.random() * 256).toString() +', '+ Math.floor(Math.random() * 256).toString() +')'
@@ -58,9 +80,40 @@
               },
             };
             const myChart = new Chart(ctx,config);
+            //
+            //
+
+            var rgb2= [];
+            for(var i=0;i<3; i++){
+                let str = 'rgb('+ Math.floor(Math.random() * 256).toString() +', ' + Math.floor(Math.random() * 256).toString() +', '+ Math.floor(Math.random() * 256).toString() +')'
+                rgb2.push(str)
+            }
+
+            const data2 = {
+              labels: [{% for p in avg_income_ppm %} '{{ p.type}}',{% endfor %}],
+              datasets: [{
+                label: 'Clientes por hora',
+                data: [{% for p in avg_income_ppm %} {{ p.income }}, {% endfor %}],
+                backgroundColor: rgb2,
+                hoverOffset: 4
+              }]};
+
+            const config2 = {
+              type: 'bar',
+              data: data2,
+              options: {
+                scales: {
+                  y: {
+                    beginAtZero: false
+                  }
+                }
+              },
+            };
+            const myChart2 = new Chart(ctx2,config2);
         }
 
         else if(graph.toString() == "clientPerHour"){
+            title.innerHTML = 'Frecuencia de clientes por hora histórico'
             var rgb= [];
             for(var i=0;i<{{ len3 }}; i++){
                 let str = 'rgb('+ Math.floor(Math.random() * 256).toString() +', ' + Math.floor(Math.random() * 256).toString() +', '+ Math.floor(Math.random() * 256).toString() +')'
@@ -89,6 +142,8 @@
             };
             const myChart = new Chart(ctx,config);
         }
+
+        //else if(graph.toString() == ""){}
 
 
         </script>
