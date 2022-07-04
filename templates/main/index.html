@@ -112,7 +112,7 @@
             const myChart2 = new Chart(ctx2,config2);
         }
 
-        else if(graph.toString() == "clientPerHour"){
+        else if(graph.toString() == "client"){
             title.innerHTML = 'Frecuencia de clientes por hora histórico'
             var rgb= [];
             for(var i=0;i<{{ len3 }}; i++){
@@ -141,6 +141,35 @@
               },
             };
             const myChart = new Chart(ctx,config);
+
+            var rgb2= [];
+            for(var i=0;i<{{ len3 }}; i++){
+                let str = 'rgb('+ Math.floor(Math.random() * 256).toString() +', ' + Math.floor(Math.random() * 256).toString() +', '+ Math.floor(Math.random() * 256).toString() +')'
+                rgb2.push(str)
+            }
+            hours = Array.from({length: {{max_stay_time.stay_hour__max}} + 1}, (x, i) => i);
+
+            const data2 = {
+              labels: hours,
+              datasets: [{
+                label: 'Clientes por hora',
+                data: [{% for p in stay_time %} {{ p.diners__sum }} , {% endfor %}],
+                backgroundColor: rgb2,
+                hoverOffset: 4
+              }]};
+
+            const config2 = {
+              type: 'bar',
+              data: data2,
+              options: {
+                scales: {
+                  y: {
+                    beginAtZero: false
+                  }
+                }
+              },
+            };
+            const myChart2 = new Chart(ctx2,config2);
         }
 
         //else if(graph.toString() == ""){}
