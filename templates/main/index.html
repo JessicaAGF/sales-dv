@@ -1,5 +1,40 @@
 {% extends 'comp/base.html' %}
 {% block content %}
+    <div class="hbox" style="width:50%; height:50%">
+        <canvas id="myChart" width="400" height="400"></canvas>
+        <script language="JavaScript">
+        const queryString = window.location.search;
+        const urlParams = new URLSearchParams(queryString);
+        const graph = urlParams.get('graph')
+        if(graph.toString() == "productFrequency"){
+            const ctx = document.getElementById('myChart');
+            var rgb= []
+            for(var i=0;i<{{ len1 }}; i++){
+                let str = 'rgb('+ Math.floor(Math.random() * 256).toString() +', ' + Math.floor(Math.random() * 256).toString() +', '+ Math.floor(Math.random() * 256).toString() +')'
+                rgb.push(str)
+            }
+            const data = {
+              labels: [{% for p in product_name %}'{{ p.name }}',{% endfor %}],
+              datasets: [{
+                label: 'Frecuencia de platos histórico',
+                data: [{% for p in product_qtt %}'{{ p.qtt }}',{% endfor %}],
+                backgroundColor: rgb,
+                hoverOffset: 4
+              }]
+            };
+            const config = {
+              type: 'doughnut',
+              data: data,
+            };
+            const myChart = new Chart(ctx,config);
+
+        }
+        else if(graph.toString() == "productCategoryPie"){
+        }
+
+        </script>
+    </div>
+    <!--
 <div class="row mt-3 pt-3">
     <div class="box" style="width:50%; height:50%">
         <canvas id="myChart" ></canvas>
@@ -41,5 +76,5 @@
         });
         </script>
     </div>
-</div>
+</div> -->
 {% endblock %}
