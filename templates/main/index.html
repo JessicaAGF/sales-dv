@@ -6,8 +6,9 @@
         const queryString = window.location.search;
         const urlParams = new URLSearchParams(queryString);
         const graph = urlParams.get('graph')
+        const ctx = document.getElementById('myChart');
         if(graph.toString() == "productFrequency"){
-            const ctx = document.getElementById('myChart');
+
             var rgb= []
             for(var i=0;i<{{ len1 }}; i++){
                 let str = 'rgb('+ Math.floor(Math.random() * 256).toString() +', ' + Math.floor(Math.random() * 256).toString() +', '+ Math.floor(Math.random() * 256).toString() +')'
@@ -29,8 +30,66 @@
             const myChart = new Chart(ctx,config);
 
         }
-        else if(graph.toString() == "productCategoryPie"){
+
+        else if(graph.toString() == "incomePerMonth"){
+            var rgb= [];
+            for(var i=0;i<{{ len2 }}; i++){
+                let str = 'rgb('+ Math.floor(Math.random() * 256).toString() +', ' + Math.floor(Math.random() * 256).toString() +', '+ Math.floor(Math.random() * 256).toString() +')'
+                rgb.push(str)
+            }
+
+            const data = {
+              labels: [{% for p in income_month %} '{{ p.month}} - {{ p.year }}',{% endfor %}],
+              datasets: [{
+                label: 'Ingreso mensual histórico',
+                data: [{% for p in income %} {{ p.income }}, {% endfor %}],
+                backgroundColor: rgb,
+                hoverOffset: 4
+              }]};
+            const config = {
+              type: 'bar',
+              data: data,
+              options: {
+                scales: {
+                  y: {
+                    beginAtZero: true
+                  }
+                }
+              },
+            };
+            const myChart = new Chart(ctx,config);
         }
+
+        else if(graph.toString() == "clientPerHour"){
+            var rgb= [];
+            for(var i=0;i<{{ len3 }}; i++){
+                let str = 'rgb('+ Math.floor(Math.random() * 256).toString() +', ' + Math.floor(Math.random() * 256).toString() +', '+ Math.floor(Math.random() * 256).toString() +')'
+                rgb.push(str)
+            }
+
+            const data = {
+              labels: [{% for p in clientsph %} '{{ p.hour}} horas',{% endfor %}],
+              datasets: [{
+                label: 'Clientes por hora',
+                data: [{% for p in clientsph %} {{ p.diners__sum }}, {% endfor %}],
+                backgroundColor: rgb,
+                hoverOffset: 4
+              }]};
+
+            const config = {
+              type: 'bar',
+              data: data,
+              options: {
+                scales: {
+                  y: {
+                    beginAtZero: false
+                  }
+                }
+              },
+            };
+            const myChart = new Chart(ctx,config);
+        }
+
 
         </script>
     </div>
