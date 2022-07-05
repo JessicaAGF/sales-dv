@@ -58,3 +58,6 @@ def index(request):
         'max_stay_time': max_stay_time,
     }
     return render(request, 'main/index.html', context)
+
+def home(request):
+    return render(request, 'main/home.html')

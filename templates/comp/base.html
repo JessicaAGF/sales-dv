@@ -1,11 +1,13 @@
 <!doctype html>
 <html lang="en">
   <head>
+      {% load static %}
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
       <!-- Chart.js CDN-->
       <script src="https://cdn.jsdelivr.net/npm/chart.js@3.8.0/dist/chart.min.js"></script>
     <title>Sales Dashboard</title>
+      <link rel=”stylesheet” href=”{% static 'dbstyle.css' %}”>
     <style>
         body{
             background-color: lavender !important;

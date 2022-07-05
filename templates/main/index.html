@@ -1,10 +1,12 @@
 {% extends 'comp/base.html' %}
 {% block content %}
-    <h1 class="hbox" id="title" style="align-content: center; padding: 10px; font-size: 30px"></h1>
-    <div class="hbox" style="display: block; padding:10px; background-color: ghostwhite; width:40%; height:40% ; border-radius: 5px">
+    <div class="content-container">
+    <link href="../../static/dbstyle.css" rel="stylesheet" >
+    <h1  id="title" style="padding: 10px; font-size: 30px"></h1>
+    <div id="gc" class="gcontainer">
         <canvas id="myChart" width="400" height="400"></canvas>
         <canvas id="myChart2" width="400" height="400"></canvas>
-        <script language="JavaScript">
+    <script language="JavaScript">
         const queryString = window.location.search;
         const urlParams = new URLSearchParams(queryString);
         const graph = urlParams.get('graph');
@@ -13,7 +15,7 @@
         const title = document.getElementById('title');
 
         if(graph.toString() == "product"){
-            title.innerHTML = 'Frecuencia de producto histórico'
+            title.innerHTML = 'Productos'
 
             var rgb= []
             for(var i=0;i<{{ len1 }}; i++){
@@ -30,30 +32,44 @@
               }]
             };
             const config = {
-              type: 'doughnut',
+              type: 'bar',
               data: data,
+              options: {
+                scales: {
+                  y: {
+                    beginAtZero: true
+                  }
+                }
+              },
             };
             const myChart = new Chart(ctx,config);
 
             const data2 = {
               labels: [{% for p in product_income %}'{{ p.name }}',{% endfor %}],
               datasets: [{
-                label: 'Frecuencia de platos histórico',
+                label: 'Ingresos por plato histórico',
                 data: [{% for p in product_income %}'{{ p.qtt }}',{% endfor %}],
                 backgroundColor: rgb,
                 hoverOffset: 4
               }]
             };
             const config2 = {
-              type: 'doughnut',
+              type: 'bar',
               data: data2,
+              options: {
+                scales: {
+                  y: {
+                    beginAtZero: true
+                  }
+                }
+              },
             };
             const myChart2 = new Chart(ctx2,config2);
 
         }
 
         else if(graph.toString() == "income"){
-            title.innerHTML = 'Ingreso mensual histórico';
+            title.innerHTML = 'Ingresos';
             var rgb= [];
             for(var i=0;i<{{ len2 }}; i++){
                 let str = 'rgb('+ Math.floor(Math.random() * 256).toString() +', ' + Math.floor(Math.random() * 256).toString() +', '+ Math.floor(Math.random() * 256).toString() +')'
@@ -92,7 +108,7 @@
             const data2 = {
               labels: [{% for p in avg_income_ppm %} '{{ p.type}}',{% endfor %}],
               datasets: [{
-                label: 'Clientes por hora',
+                label: 'Frecuencia de medio de pago',
                 data: [{% for p in avg_income_ppm %} {{ p.income }}, {% endfor %}],
                 backgroundColor: rgb2,
                 hoverOffset: 4
@@ -113,7 +129,7 @@
         }
 
         else if(graph.toString() == "client"){
-            title.innerHTML = 'Frecuencia de clientes por hora histórico'
+            title.innerHTML = 'Clientes'
             var rgb= [];
             for(var i=0;i<{{ len3 }}; i++){
                 let str = 'rgb('+ Math.floor(Math.random() * 256).toString() +', ' + Math.floor(Math.random() * 256).toString() +', '+ Math.floor(Math.random() * 256).toString() +')'
@@ -147,12 +163,12 @@
                 let str = 'rgb('+ Math.floor(Math.random() * 256).toString() +', ' + Math.floor(Math.random() * 256).toString() +', '+ Math.floor(Math.random() * 256).toString() +')'
                 rgb2.push(str)
             }
-            hours = Array.from({length: {{max_stay_time.stay_hour__max}} + 1}, (x, i) => i);
+            hours = Array.from({length: {{max_stay_time.stay_hour__max}} + 1}, (x, i) => i.toString() + ' horas');
 
             const data2 = {
               labels: hours,
               datasets: [{
-                label: 'Clientes por hora',
+                label: 'Frecuencia de clientes por horas de estadía',
                 data: [{% for p in stay_time %} {{ p.diners__sum }} , {% endfor %}],
                 backgroundColor: rgb2,
                 hoverOffset: 4
@@ -176,6 +192,7 @@
 
 
         </script>
+    </div>
     </div>
     <!--
 <div class="row mt-3 pt-3">
