@@ -1,9 +1,18 @@
 {% extends 'comp/base.html' %}
 {% block content %}
-    <div class="content-container">
-    <link href="../../static/dbstyle.css" rel="stylesheet" >
-    <h1  id="title" style="padding: 10px; font-size: 30px"> Bienvenido!</h1>
-        <p style="background-color: ghostwhite; padding: 10px; border-radius: 5px"> Accede a los gráficos de tu negocio seleccionando en "Gráficos" el tema de tu interés.</p>
-    </div>
+<link href="../../static/dbstyle.css" rel="stylesheet" >
+    <h1  id="title" align="center" style="padding: 10px; font-size: 30px;"> Bienvenido</h1>
+    <div style="display: flex; justify-content: center;">
+        <div class="content-container" style="flex-grow: 1; margin: 20px" >
+            <div style="flex-direction: column;background-color: ghostwhite; padding: 10px; border-radius: 5px">
+                <p align="center" style="font-size: 20px; font-weight: bold"> A continuación está el resumen de tus datos.</p>
+                <p align="center" style="font-size: 15px; margin: 0px !important;">Para información más específica, selecciona el tema de tu interés en "Gráficos"</p>
+            </div>
+        </div>
+        <div class="content-container" style="flex-grow: 4; margin: 20px; background-color: #c9c8e4; border-radius: 5px">
+            <div style="flex-direction: column;background-color: ghostwhite; padding: 10px; border-radius: 5px">
 
+            </div>
+        </div>
+    </div>
 {% endblock %}
