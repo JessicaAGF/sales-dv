@@ -78,36 +78,43 @@ def thousands(num):
     return str(num)[0:start] + rest
 
 def home(request):
-    #ingresos
-    desc_income = income_month.order_by('-month', '-year')
-    last_month_income = desc_income[0:1].get()
-    last_last_month_income = desc_income[1:2].get()
+    if request.method == 'POST':
+        #month_year
+        requested_month = request.POST["month"]
 
-    #costos
-    num_of_waiters = len(s.annotate(month=ExtractMonth('opened')).filter(month=str(last_month_income['month'])).values(
-        'cashier').distinct())
-    num_of_cashiers = len(s.annotate(month=ExtractMonth('opened')).filter(month=str(last_month_income['month'])).values(
-        'waiter').distinct())
-    cost_of_food = last_month_income['income'] * 0.45
+        #ingresos
+        desc_income = income_month.order_by('-month', '-year')
+        last_month_income = desc_income[0:1].get()
+        last_last_month_income = desc_income[1:2].get()
 
-    # sueldos + renta + cuentas y mantenimiento + costo comida e iva
-    cost_per_month = (num_of_waiters * 300000 + num_of_cashiers * 450000 + 1000000 + 1000000 + cost_of_food)
-    difference = ((last_month_income['income'] - last_last_month_income['income']) / last_last_month_income['income'])*100
-    pos_diff = None
-    if difference > 0:
-        pos_diff = 1
-    profit = int(last_month_income['income'] - cost_per_month)
-    difference = str(difference)[:4]
+        #costos
+        num_of_waiters = len(s.annotate(month=ExtractMonth('opened')).filter(month=str(last_month_income['month'])).values(
+            'cashier').distinct())
+        num_of_cashiers = len(s.annotate(month=ExtractMonth('opened')).filter(month=str(last_month_income['month'])).values(
+            'waiter').distinct())
+        cost_of_food = last_month_income['income'] * 0.45
 
-    context = {
-        'last_month_income': thousands(int(last_month_income['income'])),
-        'last_last_month_income': thousands(int(last_last_month_income['income'])),
-        'cost_per_month': thousands(int(cost_per_month)),
-        'profit': thousands(profit),
-        'difference': difference,
-        'pos_diff': pos_diff,
-        'income_month': income_month.values('month', 'year'),
-        'income': income_month.values('income'),
-        'len2': len(income_month),
-    }
+        # sueldos + renta + cuentas y mantenimiento + costo comida e iva
+        cost_per_month = (num_of_waiters * 300000 + num_of_cashiers * 450000 + 1000000 + 1000000 + cost_of_food)
+        difference = ((last_month_income['income'] - last_last_month_income['income']) / last_last_month_income['income'])*100
+        pos_diff = None
+        if difference > 0:
+            pos_diff = 1
+        profit = int(last_month_income['income'] - cost_per_month)
+        difference = str(difference)[:4]
+
+        months = desc_income.values('month', 'year')
+
+        context = {
+            'last_month_income': thousands(int(last_month_income['income'])),
+            'last_last_month_income': thousands(int(last_last_month_income['income'])),
+            'cost_per_month': thousands(int(cost_per_month)),
+            'profit': thousands(profit),
+            'difference': difference,
+            'pos_diff': pos_diff,
+            'income_month': income_month.values('month', 'year'),
+            'income': income_month.values('income'),
+            'len2': len(income_month),
+            'all_months': months,
+        }
     return render(request, 'main/home.html', context)
