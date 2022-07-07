@@ -1,6 +1,6 @@
 from django.db.models.functions import TruncMonth, ExtractMonth, ExtractYear, ExtractHour, ExtractDay, ExtractMinute
 from django.shortcuts import render
-from .models import *
+from .models import * #from visual_app.models import *
 from django.db.models import Count, Sum, Max, F, When
 from django.db.models import Case, Value, When
 
@@ -64,6 +64,19 @@ def index(request):
     return render(request, 'main/index.html', context)
 
 
+def thousands(num):
+    threesum = len(str(num)) // 3
+    start = len(str(num)) - threesum * 3
+
+    to_sep = str(num)[start:]
+    rest = ''
+    for i in range(threesum):
+        rest += '.' + to_sep[i * 3:(i + 1) * 3]
+
+    if len(str(num)) % 3 == 0:
+        return rest[1:]
+    return str(num)[0:start] + rest
+
 def home(request):
     #ingresos
     desc_income = income_month.order_by('-month', '-year')
@@ -79,17 +92,22 @@ def home(request):
 
     # sueldos + renta + cuentas y mantenimiento + costo comida e iva
     cost_per_month = (num_of_waiters * 300000 + num_of_cashiers * 450000 + 1000000 + 1000000 + cost_of_food)
-    profit = last_month_income['income'] - cost_per_month
-    difference = (last_month_income['income'] - last_last_month_income['income']) / last_last_month_income['income']
+    difference = ((last_month_income['income'] - last_last_month_income['income']) / last_last_month_income['income'])*100
+    pos_diff = None
+    if difference > 0:
+        pos_diff = 1
+    profit = int(last_month_income['income'] - cost_per_month)
+    difference = str(difference)[:4]
 
-    print(profit)
-    print(cost_per_month)
-    print(last_month_income['income'])
     context = {
-        'last_month_income': last_month_income,
-        'last_last_month_income': last_last_month_income,
-        'cost_per_month': cost_per_month,
-        'profit': profit,
+        'last_month_income': thousands(int(last_month_income['income'])),
+        'last_last_month_income': thousands(int(last_last_month_income['income'])),
+        'cost_per_month': thousands(int(cost_per_month)),
+        'profit': thousands(profit),
         'difference': difference,
+        'pos_diff': pos_diff,
+        'income_month': income_month.values('month', 'year'),
+        'income': income_month.values('income'),
+        'len2': len(income_month),
     }
     return render(request, 'main/home.html', context)

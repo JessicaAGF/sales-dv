@@ -2,16 +2,94 @@
 {% block content %}
 <link href="../../static/dbstyle.css" rel="stylesheet" >
     <h1  id="title" align="center" style="padding: 10px; font-size: 30px;"> Bienvenido</h1>
-    <div style="display: flex; justify-content: center;">
-        <div class="content-container" style="flex-grow: 1; margin: 20px" >
+    <div style="display: flex; justify-content: center; width: 100%">
+        <div class="content-container" style="width: 20%; margin: 20px" >
             <div style="flex-direction: column;background-color: ghostwhite; padding: 10px; border-radius: 5px">
-                <p align="center" style="font-size: 20px; font-weight: bold"> A continuación está el resumen de tus datos.</p>
-                <p align="center" style="font-size: 15px; margin: 0px !important;">Para información más específica, selecciona el tema de tu interés en "Gráficos"</p>
+                <p align="center" style="font-size: 20px; font-weight: bold"> Seleccione período</p>
+                <button align="center" style="font-size: 15px; margin: 0px !important;">Ene-2019</button>
+                <button align="center" style="font-size: 15px; margin: 0px !important;">Feb-2019</button>
+                <button align="center" style="font-size: 15px; margin: 0px !important;">Mar-2019</button>
+
             </div>
         </div>
-        <div class="content-container" style="flex-grow: 4; margin: 20px; background-color: #c9c8e4; border-radius: 5px">
-            <div style="flex-direction: column;background-color: ghostwhite; padding: 10px; border-radius: 5px">
 
+        <div class="content-container" style="width: 60%; flex-direction:row !important; flex-wrap:wrap; margin: 20px; background-color: #c9c8e4; border-radius: 5px">
+            <div class="whitebox boldfont" align="center" style="width: 100%; margin: 6px; margin-bottom: 3px; font-size: 25px !important; padding: 5px !important;"> Enero</div>
+
+            <div class="d-flex justify-content-around" style="width: 100%; margin-left: 3px; margin-right: 3px">
+                <div class="whitebox" style="width: 100%">
+                    <p class="boldfont">Ingresos</p>
+                    <hr class="solid">
+                    <p style="margin: 0px;">${{last_month_income}}</p>
+                </div>
+
+                <div class="whitebox" style="width: 100%">
+                    <p class="boldfont">Costo último mes</p>
+                    <hr class="solid">
+                    <p style="margin: 0px;">${{cost_per_month}}</p>
+                </div>
+
+                <div class="whitebox" style="width: 100%">
+                    <p class="boldfont">Margen último mes</p>
+                    <hr class="solid">
+                    <p style="margin: 0px;">${{profit}}</p>
+                </div>
+        </div>
+            <div class="d-flex justify-content-around" style="width: 100%; margin-left: 3px; margin-right: 3px">
+            <div class="whitebox" style="width: 50%">
+                <p class="boldfont">Ingresos mes anterior</p>
+                <hr class="solid">
+                <p style="margin: 0px;">${{last_last_month_income}}</p>
+            </div>
+
+            <div class="whitebox" style="width: 50%">
+                <p class="boldfont">Variación de ingresos</p>
+                <hr class="solid">
+                <p style="margin: 0px; color: {% if pos_diff %} mediumseagreen">+%{% else %} darkred">-%{% endif %}{{difference}}</p>
+            </div>
+        </div>
+            <div class="d-flex justify-content-around" style="width: 100%; margin-left: 3px; margin-right: 3px">
+                <div style="width: 60% ">
+                    <canvas class="whitebox" id="myChart" width="300" height="150"></canvas>
+                    <script>
+                        const ctx = document.getElementById('myChart');
+                        var rgb= [];
+                        for(var i=0;i<{{ len2 }}; i++){
+                            let str = 'rgb('+ Math.floor(Math.random() * 256).toString() +', ' + Math.floor(Math.random() * 256).toString() +', '+ Math.floor(Math.random() * 256).toString() +')'
+                            rgb.push(str)
+                        }
+
+                        const data = {
+                          labels: [{% for p in income_month %} '{{ p.month}} - {{ p.year }}',{% endfor %}],
+                          datasets: [{
+                            data: [{% for p in income %} {{ p.income }}, {% endfor %}],
+                            backgroundColor: rgb,
+                            hoverOffset: 4
+                          }]};
+                        const config = {
+                          type: 'bar',
+                          data: data,
+                          options: {
+                              scales: {
+                                  y: {
+                                      beginAtZero: true
+                                  }
+                                  },
+                              plugins: {
+                                  title: {
+                                      display: true,
+                                      text: 'Ingresos mensuales'
+                                  },
+                                  legend:{
+                                  display: false
+                                  },
+                              },
+                          }
+                        };
+                        const myChart = new Chart(ctx,config);
+                    </script>
+                </div>
+                <div class="whitebox" style="width: 40% "> hola</div>
             </div>
         </div>
     </div>
