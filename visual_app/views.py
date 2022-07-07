@@ -5,27 +5,29 @@ from django.db.models import Count, Sum, Max, F, When
 from django.db.models import Case, Value, When
 
 # queries
+s = Sale.objects
+p = Product.objects
 
 # frecuencia de productos
-product_qtt = Product.objects.values('name').annotate(qtt=Sum('quantity')).order_by('name')
+product_qtt = p.values('name').annotate(qtt=Sum('quantity')).order_by('name')
 # ingresos por producto
-product_income = Product.objects.values('name').annotate(qtt=Sum('quantity') * F('price')).order_by('name')
+product_income = p.values('name').annotate(qtt=Sum('quantity') * F('price')).order_by('name')
 # ingreso mensual
-income_month = Sale.objects.annotate(month=ExtractMonth('opened'), year=ExtractYear('opened')).values(
-    'month', 'year').annotate(income=Sum('total'))
+income_month = s.annotate(month=ExtractMonth('opened'), year=ExtractYear('opened')).values('month', 'year').annotate(
+    income=Sum('total'))
 
 # clientes por hora
 a_client_per_hour = []
 for i in range(25):
-    client_per_hour = Sale.objects.annotate(inithour=ExtractHour('opened'), finhour=ExtractHour('closed')).filter(
+    client_per_hour = s.annotate(inithour=ExtractHour('opened'), finhour=ExtractHour('closed')).filter(
         inithour__lte=i, finhour__gte=i).aggregate(Sum('diners'))
     if client_per_hour['diners__sum'] is not None:
         client_per_hour['hour'] = i
         a_client_per_hour += [client_per_hour]
 
 # frecuencia de ventas y clientes por horas de estadía
-stay_time = Sale.objects.annotate(inithour=ExtractHour('opened'), initmin=(ExtractMinute('opened')),
-                                  finhour=ExtractHour('closed'), finmin=(ExtractMinute('closed'))).annotate(
+stay_time = s.annotate(inithour=ExtractHour('opened'), initmin=(ExtractMinute('opened')),
+                       finhour=ExtractHour('closed'), finmin=(ExtractMinute('closed'))).annotate(
     stay_min=F('finmin') - F('initmin'),
     stay_hour=Case(
         When(stay_min__gt=0, then=F('finhour') - F('inithour')),
@@ -38,8 +40,8 @@ max_stay_time = stay_time.aggregate(Max('stay_hour'))
 print(stay_time)
 
 # ingreso promedio
-total_days = len(Sale.objects.annotate(day=ExtractDay('opened'), year=ExtractYear('opened'),
-                                       month=ExtractMonth('opened')).values('day', 'month', 'year').distinct())
+total_days = len(s.annotate(day=ExtractDay('opened'), year=ExtractYear('opened'),
+                            month=ExtractMonth('opened')).values('day', 'month', 'year').distinct())
 income_per_pm = Payment.objects.values('type').annotate(income=Sum('amount') / total_days)
 
 
@@ -61,7 +63,33 @@ def index(request):
     }
     return render(request, 'main/index.html', context)
 
+
 def home(request):
-    last_month_income =
-    context = {}
+    #ingresos
+    desc_income = income_month.order_by('-month', '-year')
+    last_month_income = desc_income[0:1].get()
+    last_last_month_income = desc_income[1:2].get()
+
+    #costos
+    num_of_waiters = len(s.annotate(month=ExtractMonth('opened')).filter(month=str(last_month_income['month'])).values(
+        'cashier').distinct())
+    num_of_cashiers = len(s.annotate(month=ExtractMonth('opened')).filter(month=str(last_month_income['month'])).values(
+        'waiter').distinct())
+    cost_of_food = last_month_income['income'] * 0.45
+
+    # sueldos + renta + cuentas y mantenimiento + costo comida e iva
+    cost_per_month = (num_of_waiters * 300000 + num_of_cashiers * 450000 + 1000000 + 1000000 + cost_of_food)
+    profit = last_month_income['income'] - cost_per_month
+    difference = (last_month_income['income'] - last_last_month_income['income']) / last_last_month_income['income']
+
+    print(profit)
+    print(cost_per_month)
+    print(last_month_income['income'])
+    context = {
+        'last_month_income': last_month_income,
+        'last_last_month_income': last_last_month_income,
+        'cost_per_month': cost_per_month,
+        'profit': profit,
+        'difference': difference,
+    }
     return render(request, 'main/home.html', context)
