@@ -1,272 +1,159 @@
 {% extends 'comp/base.html' %}
 {% block content %}
-    <div class="content-container">
-        <link href="../../static/dbstyle.css" rel="stylesheet">
-        <h1 id="title" style="padding: 10px; font-size: 30px"></h1>
-        <div id="gc" class="gcontainer">
-            <canvas id="myChart" width="600" height="400"></canvas>
-            <canvas id="myChart2" width="600" height="400"></canvas>
-            <script language="JavaScript">
-                const queryString = window.location.search;
-                const urlParams = new URLSearchParams(queryString);
-                const graph = urlParams.get('graph');
-                const ctx = document.getElementById('myChart');
-                const ctx2 = document.getElementById('myChart2');
-                const title = document.getElementById('title');
-
-                if (graph.toString() == "product") {
-                    title.innerHTML = 'Productos'
-
-                    var rgb = []
-                    for (var i = 0; i <{{ len1 }}; i++) {
-                        let str = 'rgb(' + Math.floor(Math.random() * 256).toString() + ', ' + Math.floor(Math.random() * 256).toString() + ', ' + Math.floor(Math.random() * 256).toString() + ')'
-                        rgb.push(str)
-                    }
-                    const data = {
-                        labels: [{% for p in product_name %}'{{ p.name }}',{% endfor %}],
-                        datasets: [{
-                            data: [{% for p in product_qtt %}'{{ p.qtt }}',{% endfor %}],
-                            backgroundColor: rgb,
-                            hoverOffset: 4
-                        }]
-                    };
-                    const config = {
-                        type: 'bar',
-                        data: data,
-                        options: {
-                            scales: {
-                                y: {
-                                    beginAtZero: true
-                                }
-                            },
-                            plugins: {
-                                title: {
-                                    display: true,
-                                    text: 'Frecuencia histórica por producto',
-                                    font: {
-                                        size: 16
-                                    },
-                                    padding: 15,
-
-                                },
-                                legend: {
-                                    display: false,
-                                },
-
-                            },
+    <link href="../../static/dbstyle.css" rel="stylesheet">
+<p id="title" style="padding: 10px; font-size: 30px;"></p>
+    <div style="display: flex">
+        <div class="content-container homediv" style="width: 20%; height: 250px;padding: 0px !important;">
+            <div class="whitebox" style="width: 100%;height: 240px;">
+                <p align="center" style="font-size: 20px; font-weight: bold; margin-bottom: 2px"> Seleccione período</p>
+                <hr class="solid" style="margin-bottom: 2px">
+                {% for m in all_months %}
+                    <form action="" method="post">
+                        {% csrf_token %}
+                        <button class="btn" name="month" value="{{ m.month }}_{{ m.year }}" align="center"
+                                style="font-size: 15px; margin: 2px !important; background-color: lightgray">
+                            {{ m.month }}-{{ m.year }}</button>
+                    </form>
+                {% endfor %}
+            </div>
+        </div>
+        <div class="content-container homediv align-items-stretch" style="width: 80%; height: 250px; flex-direction: column !important;">
+            <div id="gc" class="gcontainer" style="flex-direction: row;">
+                <div class="whitebox" style="height: 240px; width:100%; margin-left: 0px;padding-left: 0px">
+                    <canvas id="myChart" ></canvas>
+                </div>
+                <div class="whitebox" style="height: 240px;width:100%; margin-right: 0px; padding-right: 0px">
+                    <canvas id="myChart2"></canvas>
+                </div>
+                <script language="JavaScript">
+                    const queryString = window.location.search;
+                    const urlParams = new URLSearchParams(queryString);
+                    const graph = urlParams.get('graph');
+                    const ctx = document.getElementById('myChart');
+                    const ctx2 = document.getElementById('myChart2');
+                    const title = document.getElementById('title');
+                    function generate_rgb(len){
+                        var rgb = [];
+                        for (var i = 0; i <len; i++) {
+                            let str = 'rgb(' + Math.floor(Math.random() * 256).toString() + ', ' + Math.floor(Math.random() * 256).toString() + ', ' + Math.floor(Math.random() * 256).toString() + ')'
+                            rgb.push(str);
                         }
-                    };
-                    const myChart = new Chart(ctx, config);
-
-                    const data2 = {
-                        labels: [{% for p in product_income %}'{{ p.name }}',{% endfor %}],
-                        datasets: [{
-                            data: [{% for p in product_income %}'{{ p.qtt }}',{% endfor %}],
-                            backgroundColor: rgb,
-                            hoverOffset: 4
-                        }]
-                    };
-                    const config2 = {
-                        type: 'bar',
-                        data: data2,
-                        options: {
-                            scales: {
-                                y: {
-                                    beginAtZero: true
-                                }
-                            },
-                            plugins: {
-                                title: {
-                                    display: true,
-                                    text: 'Ingresos históricos por producto',
-                                    font: {
-                                        size: 16
+                        return rgb;
+                    }
+                    function set_chart(data, title,chart){
+                        const config = {
+                            type: 'bar',
+                            data: data,
+                            options: {
+                                responsive: false,
+                                scales: {
+                                    y: {
+                                        beginAtZero: true
+                                    }
+                                },
+                                plugins: {
+                                    title: {
+                                        display: true,
+                                        text: title,
+                                        font: {
+                                            size: 16
+                                        },
+                                        padding: 15,
                                     },
-                                    padding: 15,
+                                    legend: {
+                                        display: false,
+                                    },
                                 },
-                                legend: {
-                                    display: false,
-                                },
-
-                            },
+                            }
+                        };
+                        if(chart == 1){
+                            const myChart = new Chart(ctx, config);
                         }
-                    };
-                    const myChart2 = new Chart(ctx2, config2);
-
-                } else if (graph.toString() == "income") {
-                    title.innerHTML = 'Ingresos';
-                    var rgb = [];
-                    for (var i = 0; i <{{ len2 }}; i++) {
-                        let str = 'rgb(' + Math.floor(Math.random() * 256).toString() + ', ' + Math.floor(Math.random() * 256).toString() + ', ' + Math.floor(Math.random() * 256).toString() + ')'
-                        rgb.push(str)
-                    }
-
-                    const data = {
-                        labels: [{% for p in income_month %} '{{ p.month}} - {{ p.year }}',{% endfor %}],
-                        datasets: [{
-                            data: [{% for p in income %} {{ p.income }}, {% endfor %}],
-                            backgroundColor: rgb,
-                            hoverOffset: 4
-                        }]
-                    };
-                    const config = {
-                        type: 'bar',
-                        data: data,
-                        options: {
-                            scales: {
-                                y: {
-                                    beginAtZero: true
-                                }
-                            },
-                            plugins: {
-                                title: {
-                                    display: true,
-                                    text: 'Ingresos mensuales',
-                                    font: {
-                                        size: 16
-                                    },
-                                    padding: 15,
-                                },
-                                legend: {
-                                    display: false,
-                                },
-                            },
+                        else{
+                            const myChart2 = new Chart(ctx2, config);
                         }
-                    };
-                    const myChart = new Chart(ctx, config);
-                    //
-                    //
 
-                    var rgb2 = [];
-                    for (var i = 0; i < 3; i++) {
-                        let str = 'rgb(' + Math.floor(Math.random() * 256).toString() + ', ' + Math.floor(Math.random() * 256).toString() + ', ' + Math.floor(Math.random() * 256).toString() + ')'
-                        rgb2.push(str)
+
                     }
 
-                    const data2 = {
-                        labels: [{% for p in avg_income_ppm %} '{{ p.type}}',{% endfor %}],
-                        datasets: [{
-                            data: [{% for p in avg_income_ppm %} {{ p.income }}, {% endfor %}],
-                            backgroundColor: rgb2,
-                            hoverOffset: 4
-                        }]
-                    };
+                    if (graph.toString() == "product") {
+                        title.innerHTML = 'Productos'
 
-                    const config2 = {
-                        type: 'bar',
-                        data: data2,
-                        options: {
-                            scales: {
-                                y: {
-                                    beginAtZero: true
-                                }
-                            },
-                            plugins: {
-                                title: {
-                                    display: true,
-                                    text: 'Frecuencia histórica por medio de pago',
-                                    font: {
-                                        size: 16
-                                    },
-                                    padding: 15,
+                        var rgb = generate_rgb({{ len1 }})
+                        const data = {
+                            labels: [{% for p in product_name %}'{{ p.name }}',{% endfor %}],
+                            datasets: [{
+                                data: [{% for p in product_qtt %}'{{ p.qtt }}',{% endfor %}],
+                                backgroundColor: rgb,
+                                hoverOffset: 4
+                            }]
+                        };
+                        set_chart(data,'Frecuencia de producto histórica',1)
 
-                                },
-                                legend: {
-                                    display: false,
-                                },
-                            },
-                        }
-                    };
-                    const myChart2 = new Chart(ctx2, config2);
-                } else if (graph.toString() == "client") {
-                    title.innerHTML = 'Clientes'
-                    var rgb = [];
-                    for (var i = 0; i <{{ len3 }}; i++) {
-                        let str = 'rgb(' + Math.floor(Math.random() * 256).toString() + ', ' + Math.floor(Math.random() * 256).toString() + ', ' + Math.floor(Math.random() * 256).toString() + ')'
-                        rgb.push(str)
+                        const data2 = {
+                            labels: [{% for p in product_income %}'{{ p.name }}',{% endfor %}],
+                            datasets: [{
+                                data: [{% for p in product_income %}'{{ p.qtt }}',{% endfor %}],
+                                backgroundColor: rgb,
+                                hoverOffset: 4
+                            }]
+                        };
+                        set_chart(data2,'Ingresos por producto histórico',2)
+
+                    }
+                    else if (graph.toString() == "income") {
+                        title.innerHTML = 'Ingresos';
+                        var rgb = generate_rgb({{ len2 }});
+                        const data = {
+                            labels: [{% for p in income_month %} '{{ p.month}} - {{ p.year }}',{% endfor %}],
+                            datasets: [{
+                                data: [{% for p in income %} {{ p.income }}, {% endfor %}],
+                                backgroundColor: rgb,
+                                hoverOffset: 4
+                            }]
+                        };
+                        set_chart(data,'Ingresos mensuales',1)
+                        //
+                        var rgb2 = generate_rgb({{ len3 }})
+                        const data2 = {
+                            labels: [{% for p in avg_income_ppm %} '{{ p.type}}',{% endfor %}],
+                            datasets: [{
+                                data: [{% for p in avg_income_ppm %} {{ p.income }}, {% endfor %}],
+                                backgroundColor: rgb2,
+                                hoverOffset: 4
+                            }]
+                        };
+                        set_chart(data2,'Frecuencia histórica por medio de pago',2)
+                    }
+                    else if (graph.toString() == "client") {
+                        title.innerHTML = 'Clientes'
+                        var rgb = generate_rgb({{ len3 }});
+                        const data = {
+                            labels: [{% for p in clientsph %} '{{ p.hour}} horas',{% endfor %}],
+                            datasets: [{
+                                data: [{% for p in clientsph %} {{ p.diners__sum }}, {% endfor %}],
+                                backgroundColor: rgb,
+                                hoverOffset: 4
+                            }]
+                        };
+                        set_chart(data,'Frecuencia de clientes promedio',1);
+
+                        var rgb2 = generate_rgb({{ len3 }});
+                        hours = Array.from({length: {{max_stay_time.stay_hour__max}} +1}, (x, i) => i.toString() + ' horas');
+                        const data2 = {
+                            labels: hours,
+                            datasets: [{
+                                data: [{% for p in stay_time %} {{ p.diners__sum }} , {% endfor %}],
+                                backgroundColor: rgb2,
+                                hoverOffset: 4
+                            }]
+                        };
+                        set_chart(data2,'Frecuencia de clientes por hora histórica',2);
                     }
 
-                    const data = {
-                        labels: [{% for p in clientsph %} '{{ p.hour}} horas',{% endfor %}],
-                        datasets: [{
-                            data: [{% for p in clientsph %} {{ p.diners__sum }}, {% endfor %}],
-                            backgroundColor: rgb,
-                            hoverOffset: 4
-                        }]
-                    };
-
-                    const config = {
-                        type: 'bar',
-                        data: data,
-                        options: {
-                            scales: {
-                                y: {
-                                    beginAtZero: false
-                                },
-                            },
-                            plugins: {
-                                title: {
-                                    display: true,
-                                    text: 'Frecuencia de clientes promedio',
-                                    font: {
-                                        size: 16
-                                    },
-                                    padding: 15,
-
-                                },
-                                legend: {
-                                    display: false,
-                                },
-                            },
-                        },
-                    };
-                    const myChart = new Chart(ctx, config);
-
-                    var rgb2 = [];
-                    for (var i = 0; i <{{ len3 }}; i++) {
-                        let str = 'rgb(' + Math.floor(Math.random() * 256).toString() + ', ' + Math.floor(Math.random() * 256).toString() + ', ' + Math.floor(Math.random() * 256).toString() + ')'
-                        rgb2.push(str)
-                    }
-                    hours = Array.from({length: {{max_stay_time.stay_hour__max}} +1}, (x, i) => i.toString() + ' horas');
-
-                    const data2 = {
-                        labels: hours,
-                        datasets: [{
-                            data: [{% for p in stay_time %} {{ p.diners__sum }} , {% endfor %}],
-                            backgroundColor: rgb2,
-                            hoverOffset: 4
-                        }]
-                    };
-
-                    const config2 = {
-                        type: 'bar',
-                        data: data2,
-                        options: {
-                            scales: {
-                                y: {
-                                    beginAtZero: false
-                                }
-                            },
-                            plugins: {
-                                title: {
-                                    display: true,
-                                    text: 'Frecuencia de clientes por hora histórica',
-                                    font: {
-                                        size: 16
-                                    },
-                                    padding: 15,
-
-                                },
-                                legend: {
-                                    display: false,
-                                },
-                            },
-                        },
-                    };
-                    const myChart2 = new Chart(ctx2, config2);
-                }
-
-            </script>
+                </script>
+            </div>
         </div>
     </div>
+    <div class="whitebox"> Detalle</div>
 {% endblock %}

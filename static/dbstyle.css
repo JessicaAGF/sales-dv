@@ -1,7 +1,7 @@
 .content-container{
     display: flex;
     justify-content: center;
-    flex-direction: column;
+    flex-direction: row;
     align-items: center;
     position: center;
 }
@@ -9,18 +9,14 @@
     display: flex;
     flex-direction: row;
     padding:10px;
-    width:40%;
-    height:40%;
     border-radius: 5px;
     align-content: center;
     justify-content: space-around;
 }
 .gcontainer canvas{
     background: ghostwhite;
-    padding: 20px;
-    margin: 0 15px;
     border-radius: 10px;
-    box-shadow: 5px 5px 4px #ccc1e6;
+    height: 100%;
 }
 
 .whitebox{
@@ -39,4 +35,12 @@
 .solid{
     border-top: 3px solid #bbb;
     margin: 1px;
+}
+
+.homediv{
+    flex-direction:row;
+    flex-wrap:wrap;
+    margin: 20px;
+    background-color: #c9c8e4;
+    border-radius: 5px
 }
