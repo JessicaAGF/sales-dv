@@ -1,13 +1,14 @@
 from django.db.models.functions import TruncMonth, ExtractMonth, ExtractYear, ExtractHour, ExtractDay, ExtractMinute
 from django.shortcuts import render
 from .models import *  # from visual_app.models import *
-from django.db.models import Count, Sum, Max, F, When
+from django.db.models import Count, Sum, Max, F, When, Q
 from django.db.models import Case, Value, When
 from django.core.exceptions import ObjectDoesNotExist
 
 # queries
 s = Sale.objects
 p = Product.objects
+pm = Payment.objects
 
 # frecuencia de productos
 product_qtt = p.values('name').annotate(qtt=Sum('quantity')).order_by('name')
@@ -47,6 +48,18 @@ income_per_pm = Payment.objects.values('type').annotate(income=Sum('amount') / t
 desc_income = income_month.order_by('-month', '-year')
 months = desc_income.values('month', 'year')
 
+# ventas y medio de pago
+income = pm.values('sale_id','amount','type')
+print(income)
+
+# ventas bien y mal cobradas
+all_sales = pm.values('sale_id').annotate(sum=Sum('amount'))
+# total not equal to allsales[saledid]
+#all_actual_sales = s.annotate(correct=Case(
+#        When(stay_min__gt=0, then=F('finhour') - F('inithour')),
+#        When(stay_min__lte=0, then=F('finhour') - F('inithour') + 1),
+#    ))
+
 # Create your views here.
 def index(request):
     context = {
@@ -63,6 +76,8 @@ def index(request):
         'stay_time': stay_time,
         'max_stay_time': max_stay_time,
         'all_months': months,
+        'total_income': income,
+
     }
     return render(request, 'main/index.html', context)
 

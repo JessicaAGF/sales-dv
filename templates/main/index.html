@@ -1,7 +1,7 @@
 {% extends 'comp/base.html' %}
 {% block content %}
     <link href="../../static/dbstyle.css" rel="stylesheet">
-<p id="title" style="padding: 10px; font-size: 30px;"></p>
+    <p id="title" style="padding: 10px; font-size: 30px;"></p>
     <div style="display: flex">
         <div class="content-container homediv" style="width: 20%; height: 250px;padding: 0px !important;">
             <div class="whitebox" style="width: 100%;height: 240px;">
@@ -17,10 +17,11 @@
                 {% endfor %}
             </div>
         </div>
-        <div class="content-container homediv align-items-stretch" style="width: 80%; height: 250px; flex-direction: column !important;">
+        <div class="content-container homediv align-items-stretch"
+             style="width: 80%; height: 250px; flex-direction: column !important;">
             <div id="gc" class="gcontainer" style="flex-direction: row;">
                 <div class="whitebox" style="height: 240px; width:100%; margin-left: 0px;padding-left: 0px">
-                    <canvas id="myChart" ></canvas>
+                    <canvas id="myChart"></canvas>
                 </div>
                 <div class="whitebox" style="height: 240px;width:100%; margin-right: 0px; padding-right: 0px">
                     <canvas id="myChart2"></canvas>
@@ -32,15 +33,17 @@
                     const ctx = document.getElementById('myChart');
                     const ctx2 = document.getElementById('myChart2');
                     const title = document.getElementById('title');
-                    function generate_rgb(len){
+
+                    function generate_rgb(len) {
                         var rgb = [];
-                        for (var i = 0; i <len; i++) {
+                        for (var i = 0; i < len; i++) {
                             let str = 'rgb(' + Math.floor(Math.random() * 256).toString() + ', ' + Math.floor(Math.random() * 256).toString() + ', ' + Math.floor(Math.random() * 256).toString() + ')'
                             rgb.push(str);
                         }
                         return rgb;
                     }
-                    function set_chart(data, title,chart){
+
+                    function set_chart(data, title, chart) {
                         const config = {
                             type: 'bar',
                             data: data,
@@ -66,10 +69,9 @@
                                 },
                             }
                         };
-                        if(chart == 1){
+                        if (chart == 1) {
                             const myChart = new Chart(ctx, config);
-                        }
-                        else{
+                        } else {
                             const myChart2 = new Chart(ctx2, config);
                         }
 
@@ -88,7 +90,7 @@
                                 hoverOffset: 4
                             }]
                         };
-                        set_chart(data,'Frecuencia de producto histórica',1)
+                        set_chart(data, 'Frecuencia de producto histórica', 1)
 
                         const data2 = {
                             labels: [{% for p in product_income %}'{{ p.name }}',{% endfor %}],
@@ -98,10 +100,9 @@
                                 hoverOffset: 4
                             }]
                         };
-                        set_chart(data2,'Ingresos por producto histórico',2)
+                        set_chart(data2, 'Ingresos por producto histórico', 2)
 
-                    }
-                    else if (graph.toString() == "income") {
+                    } else if (graph.toString() == "income") {
                         title.innerHTML = 'Ingresos';
                         var rgb = generate_rgb({{ len2 }});
                         const data = {
@@ -112,7 +113,7 @@
                                 hoverOffset: 4
                             }]
                         };
-                        set_chart(data,'Ingresos mensuales',1)
+                        set_chart(data, 'Ingresos mensuales', 1)
                         //
                         var rgb2 = generate_rgb({{ len3 }})
                         const data2 = {
@@ -123,9 +124,8 @@
                                 hoverOffset: 4
                             }]
                         };
-                        set_chart(data2,'Frecuencia histórica por medio de pago',2)
-                    }
-                    else if (graph.toString() == "client") {
+                        set_chart(data2, 'Frecuencia histórica por medio de pago', 2)
+                    } else if (graph.toString() == "client") {
                         title.innerHTML = 'Clientes'
                         var rgb = generate_rgb({{ len3 }});
                         const data = {
@@ -136,7 +136,7 @@
                                 hoverOffset: 4
                             }]
                         };
-                        set_chart(data,'Frecuencia de clientes promedio',1);
+                        set_chart(data, 'Frecuencia de clientes promedio', 1);
 
                         var rgb2 = generate_rgb({{ len3 }});
                         hours = Array.from({length: {{max_stay_time.stay_hour__max}} +1}, (x, i) => i.toString() + ' horas');
@@ -148,12 +148,37 @@
                                 hoverOffset: 4
                             }]
                         };
-                        set_chart(data2,'Frecuencia de clientes por hora histórica',2);
+                        set_chart(data2, 'Frecuencia de clientes por hora histórica', 2);
                     }
 
                 </script>
             </div>
         </div>
     </div>
-    <div class="whitebox"> Detalle</div>
+    <div class="whitebox" align="center" style="font-weight: bold;font-size: 25px"> Detalle</div>
+    <div class="whitebox" style="height:500px; margin: 10px 0px 10px">
+        <table class="table">
+            <thead>
+            <tr>
+                <th style="width:48%">Id de venta</th>
+                <th style="width:25%">Ingreso</th>
+                <th style="width:25%">Medio de pago</th>
+            </tr>
+            </thead>
+        </table>
+        <div style="width:100%;overflow:auto; max-height:400px;">
+            <table class="table">
+                <tbody >
+                {% for i in total_income %}
+                    <tr>
+                        <td style="width:50%">{{ i.sale_id }}</td>
+                        <td style="width:25%">{{ i.amount }}</td>
+                        <td style="width:25%">{{ i.type }}</td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+    </div>
 {% endblock %}
