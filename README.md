@@ -1,5 +1,6 @@
 # sales-dv
 ## Instrucciones
+Todos los comandos a continuación deben ser ejecutados en la carpeta root del proyecto.
 Clonar repositorio github
    ```sh
    git clone https://github.com/JessicaAGF/sales-dv.git
