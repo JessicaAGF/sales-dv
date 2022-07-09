@@ -28,14 +28,15 @@ for i in range(25):
         a_client_per_hour += [client_per_hour]
 
 # frecuencia de ventas y clientes por horas de estadía
-stay_time = s.annotate(inithour=ExtractHour('opened'), initmin=(ExtractMinute('opened')),
+client_hour = s.annotate(inithour=ExtractHour('opened'), initmin=(ExtractMinute('opened')),
                        finhour=ExtractHour('closed'), finmin=(ExtractMinute('closed'))).annotate(
     stay_min=F('finmin') - F('initmin'),
     stay_hour=Case(
         When(stay_min__gt=0, then=F('finhour') - F('inithour')),
         When(stay_min__lte=0, then=F('finhour') - F('inithour') + 1),
 
-    )).values('stay_hour').annotate(Sum('diners'))
+    ))
+stay_time = client_hour.values('stay_hour').annotate(Sum('diners'))
 
 max_stay_time = stay_time.aggregate(Max('stay_hour'))
 
@@ -50,18 +51,39 @@ months = desc_income.values('month', 'year')
 
 # ventas y medio de pago
 income = pm.values('sale_id','amount','type')
-print(income)
 
 # ventas bien y mal cobradas
-all_sales = pm.values('sale_id').annotate(sum=Sum('amount'))
-# total not equal to allsales[saledid]
-#all_actual_sales = s.annotate(correct=Case(
-#        When(stay_min__gt=0, then=F('finhour') - F('inithour')),
-#        When(stay_min__lte=0, then=F('finhour') - F('inithour') + 1),
-#    ))
+all_sales = list(pm.values('sale_id').annotate(sum=Sum('amount')).order_by('sale_id'))
+all_sales2 = p.annotate(amount=F('price')*F('quantity'))
+all_sales2 = list(all_sales2.values('sale_id').annotate(sum=Sum('amount')).order_by('sale_id'))
+
+wrong_sales=[]
+right_sales=[]
+for i in range(len(all_sales)):
+    a1 = all_sales[i]
+    a2 = all_sales2[i]
+    a1['right_amount'] = a2['sum']
+    if a2['sum'] != a1['sum']:
+        wrong_sales += [a1]
+    else:
+        right_sales += [a1]
+
 
 # Create your views here.
 def index(request):
+    total_income = right_sales+wrong_sales
+    if request.method == 'POST':
+        # tipo de ventas
+        requested_sale = request.POST["sale"]
+        if requested_sale == "all":
+            total_income = right_sales+wrong_sales
+        elif requested_sale == "right":
+            total_income = right_sales
+        elif requested_sale == "wrong":
+            total_income = wrong_sales
+
+    # si no, muestro todas las ventas
+
     context = {
         'product_name': product_qtt.values('name'),
         'product_qtt': product_qtt.values('qtt'),
@@ -76,7 +98,9 @@ def index(request):
         'stay_time': stay_time,
         'max_stay_time': max_stay_time,
         'all_months': months,
-        'total_income': income,
+        'total_income': total_income,
+        'products': p.all().values()[0:100],
+        'clients': client_hour.values('sale_id', 'diners', 'stay_hour', 'total'),
 
     }
     return render(request, 'main/index.html', context)
@@ -191,5 +215,7 @@ def home(request):
         'total_income': thousands(int(total_income)),
         'total_profit': thousands(int(total_profit)),
         'total_cost': thousands(int(total_cost)),
+        'clientsph': a_client_per_hour,
+        'len3': len(a_client_per_hour),
     }
     return render(request, 'main/home.html', context)

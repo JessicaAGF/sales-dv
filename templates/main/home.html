@@ -17,19 +17,19 @@
                 {% endfor %}
             </div>
             <div class="whitebox" style="width: 100%">
-                <p class="boldfont">Ingresos</p>
+                <p class="boldfont">Ingresos totales</p>
                 <hr class="solid">
                 <p style="margin: 0px;">${{ total_income }}</p>
             </div>
 
             <div class="whitebox" style="width: 100%">
-                <p class="boldfont">Costo</p>
+                <p class="boldfont">Costo total</p>
                 <hr class="solid">
                 <p style="margin: 0px;">${{ total_cost }}</p>
             </div>
 
             <div class="whitebox" style="width: 100%">
-                <p class="boldfont">Margen</p>
+                <p class="boldfont">Margen total</p>
                 <hr class="solid">
                 <p style="margin: 0px;">${{ total_profit }}</p>
 
@@ -77,15 +77,19 @@
             </div>
             <div class="d-flex justify-content-around"
                  style="width: 100%; margin-left: 3px; margin-right: 3px; margin-bottom: 3px">
-                <div class="whitebox" style="width: 60% ">
+                <div class="whitebox" style="width: 50% ">
                     <p align="center" style="font-size: 16px; font-weight: bold">Ingresos mensuales</p>
-                    <canvas  id="myChart" width="300" height="150"></canvas>
+                    <canvas id="myChart" width="300" height="150"></canvas>
                 </div>
-                <div class="whitebox" style="width: 40% "> hola</div>
+                <div class="whitebox" style="width: 50% ">
+                    <p align="center" style="font-size: 16px; font-weight: bold">Frecuencia clientes por hora</p>
+                    <canvas id="myChart2" width="300" height="150"></canvas>
+                </div>
             </div>
         </div>
         <script>
             const ctx = document.getElementById('myChart');
+            const ctx2 = document.getElementById('myChart2');
             var rgb = [];
             for (var i = 0; i <{{ len2 }}; i++) {
                 let str = 'rgb(' + Math.floor(Math.random() * 256).toString() + ', ' + Math.floor(Math.random() * 256).toString() + ', ' + Math.floor(Math.random() * 256).toString() + ')'
@@ -117,6 +121,42 @@
                 }
             };
             const myChart = new Chart(ctx, config);
+
+            var rgb2 = [];
+            for (var i = 0; i <{{ len3 }}; i++) {
+                let str = 'rgb(' + Math.floor(Math.random() * 256).toString() + ', ' + Math.floor(Math.random() * 256).toString() + ', ' + Math.floor(Math.random() * 256).toString() + ')'
+                rgb2.push(str)
+            }
+
+            const data2 = {
+                labels: [{% for p in clientsph %} '{{ p.hour}} horas',{% endfor %}],
+                datasets: [{
+                    data: [{% for p in clientsph %} {{ p.diners__sum }}, {% endfor %}],
+                    backgroundColor: rgb2,
+                    hoverOffset: 4
+                }]
+            };
+
+            const config2 = {
+                type: 'bar',
+                data: data2,
+                options: {
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            display: false
+                        },
+                    },
+                }
+            };
+            const myChart2 = new Chart(ctx2, config2);
+
+
+            set_chart(data2, 'Frecuencia de clientes promedio', 2);
         </script>
     </div>
 {% endblock %}

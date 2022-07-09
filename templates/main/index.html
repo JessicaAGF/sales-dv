@@ -1,22 +1,17 @@
 {% extends 'comp/base.html' %}
 {% block content %}
     <link href="../../static/dbstyle.css" rel="stylesheet">
-    <p id="title" style="padding: 10px; font-size: 30px;"></p>
-    <div style="display: flex">
-        <div class="content-container homediv" style="width: 20%; height: 250px;padding: 0px !important;">
-            <div class="whitebox" style="width: 100%;height: 240px;">
-                <p align="center" style="font-size: 20px; font-weight: bold; margin-bottom: 2px"> Seleccione período</p>
-                <hr class="solid" style="margin-bottom: 2px">
-                {% for m in all_months %}
-                    <form action="" method="post">
-                        {% csrf_token %}
-                        <button class="btn" name="month" value="{{ m.month }}_{{ m.year }}" align="center"
-                                style="font-size: 15px; margin: 2px !important; background-color: lightgray">
-                            {{ m.month }}-{{ m.year }}</button>
-                    </form>
-                {% endfor %}
+    <p id="title" align="center" style="padding: 10px; font-size: 30px; font-weight: bold"></p>
+    <div style="display: flex; justify-content: center">
+        <div id="box">
+            <div id="selector" class="content-container homediv" style=" height: 250px;padding: 0px !important;">
+                <div class="whitebox" style="width: 100%;height: 240px;">
+                    <p align="center" style="font-size: 20px; font-weight: bold; margin-bottom: 2px"></p>
+                    <hr class="solid" style="margin-bottom: 2px">
+                </div>
             </div>
         </div>
+
         <div class="content-container homediv align-items-stretch"
              style="width: 80%; height: 250px; flex-direction: column !important;">
             <div id="gc" class="gcontainer" style="flex-direction: row;">
@@ -26,13 +21,38 @@
                 <div class="whitebox" style="height: 240px;width:100%; margin-right: 0px; padding-right: 0px">
                     <canvas id="myChart2"></canvas>
                 </div>
-                <script language="JavaScript">
+
+            </div>
+        </div>
+    </div>
+    <div class="whitebox" align="center" style="font-weight: bold;font-size: 25px"> Detalle</div>
+    <div id="detalles" class="whitebox" style="height:500px; margin: 10px 0px 10px">
+        <table class="table" >
+            <thead id="details_head">
+
+            </thead>
+        </table>
+        <div style="width:100%;overflow:auto; max-height:400px;">
+            <table class="table">
+                <tbody id="details_body">
+
+                </tbody>
+            </table>
+        </div>
+
+    </div>
+    <script language="JavaScript">
                     const queryString = window.location.search;
                     const urlParams = new URLSearchParams(queryString);
                     const graph = urlParams.get('graph');
                     const ctx = document.getElementById('myChart');
                     const ctx2 = document.getElementById('myChart2');
                     const title = document.getElementById('title');
+                    const selector = document.getElementById('selector');
+                    const box = document.getElementById('box');
+                    const details_body = document.getElementById('details_body');
+                    const details_head = document.getElementById('details_head');
+
 
                     function generate_rgb(len) {
                         var rgb = [];
@@ -79,8 +99,10 @@
                     }
 
                     if (graph.toString() == "product") {
+                        box.innerHTML = ""
                         title.innerHTML = 'Productos'
 
+                        //gráficos------------------------------------------
                         var rgb = generate_rgb({{ len1 }})
                         const data = {
                             labels: [{% for p in product_name %}'{{ p.name }}',{% endfor %}],
@@ -102,7 +124,38 @@
                         };
                         set_chart(data2, 'Ingresos por producto histórico', 2)
 
-                    } else if (graph.toString() == "income") {
+                        //detalles-------------------------------------------
+                        details_head.innerHTML = `<tr>
+                        <th style ='width:35%'> Id de venta </th>
+                        <th style='width:20%'>Categoría</th>
+                        <th style='width:20%'>Nombre</th>
+                        <th style='width:12%'>Precio</th>
+                        <th style='width:12%'>Cantidad</th>
+                    </tr>`
+                        details_body.innerHTML = `{% for i in products %}
+                            <tr>
+                            <td style = 'width:35%' > {{ i.sale_id }} </td>
+                            <td style='width:20%'>{{ i.category }}</td>
+                            <td style='width:20%'>{{ i.name }}</td>
+                            <td style='width:12%'>{{ i.price }}</td>
+                            <td style='width:12%'>{{ i.quantity }}</td>
+                            </tr>
+                        {% endfor %}`
+
+                    }
+                    else if (graph.toString() == "income") {
+                        selector.innerHTML = `<div class="whitebox" style="width: 100%;height: 240px;">
+                <p align="center" style="font-size: 20px; font-weight: bold; margin-bottom: 2px"> Selecciona el tipo de venta</p>
+                <hr class="solid" style="margin-bottom: 2px">
+                    <form action="" method="post">
+                        {% csrf_token %}
+                        <button class="btn" name="sale" value="all" align="center"style="font-size: 15px; margin: 2px !important; background-color: lightgray">Todas</button>
+                    {% csrf_token %}
+                        <button class="btn" name="sale" value="wrong" align="center"style="font-size: 15px; margin: 2px !important; background-color: lightgray">Cobro incorrecto</button>
+                    {% csrf_token %}
+                        <button class="btn" name="sale" value="right" align="center"style="font-size: 15px; margin: 2px !important; background-color: lightgray">Cobro correcto</button>
+                    </form>
+            </div>`
                         title.innerHTML = 'Ingresos';
                         var rgb = generate_rgb({{ len2 }});
                         const data = {
@@ -125,7 +178,25 @@
                             }]
                         };
                         set_chart(data2, 'Frecuencia histórica por medio de pago', 2)
-                    } else if (graph.toString() == "client") {
+
+                        //detalles-------------------------------------------
+                        details_head.innerHTML = `<tr>
+                        <th style ='width:48%'> Id de venta </th>
+                        <th style='width:25%'>Ingreso pagado</th>
+                        <th style='width:25%'>Ingreso a cobrar</th>
+                        <th style='width:25%'>Medio de pago</th>
+                    </tr>`
+                        details_body.innerHTML = `{% for i in total_income %}
+                            <tr>
+                            <td style = 'width:50%' > {{ i.sale_id }} </td>
+                            <td style='width:25%'>{{ i.sum }}</td>
+                            <td style='width:25%'>{{ i.right_amount }}</td>
+                            <td style='width:25%'>{{ i.type }}</td>
+                            </tr>
+                        {% endfor %}`
+                    }
+                    else if (graph.toString() == "client") {
+                        box.innerHTML = ""
                         title.innerHTML = 'Clientes'
                         var rgb = generate_rgb({{ len3 }});
                         const data = {
@@ -149,36 +220,23 @@
                             }]
                         };
                         set_chart(data2, 'Frecuencia de clientes por hora histórica', 2);
+                        //'sale_id', 'diners', 'stay_hour', 'total'
+                                            //detalles-------------------------------------------
+                        details_head.innerHTML = `<tr>
+                        <th style ='width:48%'> Id de venta </th>
+                        <th style='width:25%'>Comensales</th>
+                        <th style='width:25%'>Horas de estadía</th>
+                        <th style='width:25%'>Monto pagado</th>
+                    </tr>`
+                        details_body.innerHTML = `{% for i in clients %}
+                            <tr>
+                            <td style = 'width:50%' > {{ i.sale_id }} </td>
+                            <td style='width:25%'>{{ i.diners }}</td>
+                            <td style='width:25%'>{{ i.stay_hour }}</td>
+                            <td style='width:25%'>{{ i.total }}</td>
+                            </tr>
+                        {% endfor %}`
                     }
 
                 </script>
-            </div>
-        </div>
-    </div>
-    <div class="whitebox" align="center" style="font-weight: bold;font-size: 25px"> Detalle</div>
-    <div class="whitebox" style="height:500px; margin: 10px 0px 10px">
-        <table class="table">
-            <thead>
-            <tr>
-                <th style="width:48%">Id de venta</th>
-                <th style="width:25%">Ingreso</th>
-                <th style="width:25%">Medio de pago</th>
-            </tr>
-            </thead>
-        </table>
-        <div style="width:100%;overflow:auto; max-height:400px;">
-            <table class="table">
-                <tbody >
-                {% for i in total_income %}
-                    <tr>
-                        <td style="width:50%">{{ i.sale_id }}</td>
-                        <td style="width:25%">{{ i.amount }}</td>
-                        <td style="width:25%">{{ i.type }}</td>
-                    </tr>
-                {% endfor %}
-                </tbody>
-            </table>
-        </div>
-
-    </div>
 {% endblock %}
