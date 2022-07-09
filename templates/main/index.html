@@ -1,240 +1,242 @@
 {% extends 'comp/base.html' %}
 {% block content %}
-    <div class="content-container">
-    <link href="../../static/dbstyle.css" rel="stylesheet" >
-    <h1  id="title" style="padding: 10px; font-size: 30px"></h1>
-    <div id="gc" class="gcontainer">
-        <canvas id="myChart" width="400" height="400"></canvas>
-        <canvas id="myChart2" width="400" height="400"></canvas>
+    <link href="../../static/dbstyle.css" rel="stylesheet">
+    <p id="title" align="center" style="padding: 10px; font-size: 30px; font-weight: bold"></p>
+    <div style="display: flex; justify-content: center">
+        <div id="box">
+            <div id="selector" class="content-container homediv" style=" height: 250px;padding: 0px !important;">
+                <div class="whitebox" style="width: 100%;height: 240px;">
+                    <p align="center" style="font-size: 20px; font-weight: bold; margin-bottom: 2px"></p>
+                    <hr class="solid" style="margin-bottom: 2px">
+                </div>
+            </div>
+        </div>
+
+        <div class="content-container homediv align-items-stretch"
+             style="width: 80%; height: 250px; flex-direction: column !important;">
+            <div id="gc" class="gcontainer" style="flex-direction: row;">
+                <div class="whitebox" style="height: 240px; width:100%; margin-left: 0px;padding-left: 0px">
+                    <canvas id="myChart"></canvas>
+                </div>
+                <div class="whitebox" style="height: 240px;width:100%; margin-right: 0px; padding-right: 0px">
+                    <canvas id="myChart2"></canvas>
+                </div>
+
+            </div>
+        </div>
+    </div>
+    <div class="whitebox" align="center" style="font-weight: bold;font-size: 25px"> Detalle</div>
+    <div id="detalles" class="whitebox" style="height:500px; margin: 10px 0px 10px">
+        <table class="table" >
+            <thead id="details_head">
+
+            </thead>
+        </table>
+        <div style="width:100%;overflow:auto; max-height:400px;">
+            <table class="table">
+                <tbody id="details_body">
+
+                </tbody>
+            </table>
+        </div>
+
+    </div>
     <script language="JavaScript">
-        const queryString = window.location.search;
-        const urlParams = new URLSearchParams(queryString);
-        const graph = urlParams.get('graph');
-        const ctx = document.getElementById('myChart');
-        const ctx2 = document.getElementById('myChart2');
-        const title = document.getElementById('title');
-
-        if(graph.toString() == "product"){
-            title.innerHTML = 'Productos'
-
-            var rgb= []
-            for(var i=0;i<{{ len1 }}; i++){
-                let str = 'rgb('+ Math.floor(Math.random() * 256).toString() +', ' + Math.floor(Math.random() * 256).toString() +', '+ Math.floor(Math.random() * 256).toString() +')'
-                rgb.push(str)
-            }
-            const data = {
-              labels: [{% for p in product_name %}'{{ p.name }}',{% endfor %}],
-              datasets: [{
-                label: 'Frecuencia de platos histórico',
-                data: [{% for p in product_qtt %}'{{ p.qtt }}',{% endfor %}],
-                backgroundColor: rgb,
-                hoverOffset: 4
-              }]
-            };
-            const config = {
-              type: 'bar',
-              data: data,
-              options: {
-                scales: {
-                  y: {
-                    beginAtZero: true
-                  }
-                }
-              },
-            };
-            const myChart = new Chart(ctx,config);
-
-            const data2 = {
-              labels: [{% for p in product_income %}'{{ p.name }}',{% endfor %}],
-              datasets: [{
-                label: 'Ingresos por plato histórico',
-                data: [{% for p in product_income %}'{{ p.qtt }}',{% endfor %}],
-                backgroundColor: rgb,
-                hoverOffset: 4
-              }]
-            };
-            const config2 = {
-              type: 'bar',
-              data: data2,
-              options: {
-                scales: {
-                  y: {
-                    beginAtZero: true
-                  }
-                }
-              },
-            };
-            const myChart2 = new Chart(ctx2,config2);
-
-        }
-
-        else if(graph.toString() == "income"){
-            title.innerHTML = 'Ingresos';
-            var rgb= [];
-            for(var i=0;i<{{ len2 }}; i++){
-                let str = 'rgb('+ Math.floor(Math.random() * 256).toString() +', ' + Math.floor(Math.random() * 256).toString() +', '+ Math.floor(Math.random() * 256).toString() +')'
-                rgb.push(str)
-            }
-
-            const data = {
-              labels: [{% for p in income_month %} '{{ p.month}} - {{ p.year }}',{% endfor %}],
-              datasets: [{
-                label: 'Ingreso mensual histórico',
-                data: [{% for p in income %} {{ p.income }}, {% endfor %}],
-                backgroundColor: rgb,
-                hoverOffset: 4
-              }]};
-            const config = {
-              type: 'bar',
-              data: data,
-              options: {
-                scales: {
-                  y: {
-                    beginAtZero: true
-                  }
-                }
-              },
-            };
-            const myChart = new Chart(ctx,config);
-            //
-            //
-
-            var rgb2= [];
-            for(var i=0;i<3; i++){
-                let str = 'rgb('+ Math.floor(Math.random() * 256).toString() +', ' + Math.floor(Math.random() * 256).toString() +', '+ Math.floor(Math.random() * 256).toString() +')'
-                rgb2.push(str)
-            }
-
-            const data2 = {
-              labels: [{% for p in avg_income_ppm %} '{{ p.type}}',{% endfor %}],
-              datasets: [{
-                label: 'Frecuencia de medio de pago',
-                data: [{% for p in avg_income_ppm %} {{ p.income }}, {% endfor %}],
-                backgroundColor: rgb2,
-                hoverOffset: 4
-              }]};
-
-            const config2 = {
-              type: 'bar',
-              data: data2,
-              options: {
-                scales: {
-                  y: {
-                    beginAtZero: false
-                  }
-                }
-              },
-            };
-            const myChart2 = new Chart(ctx2,config2);
-        }
-
-        else if(graph.toString() == "client"){
-            title.innerHTML = 'Clientes'
-            var rgb= [];
-            for(var i=0;i<{{ len3 }}; i++){
-                let str = 'rgb('+ Math.floor(Math.random() * 256).toString() +', ' + Math.floor(Math.random() * 256).toString() +', '+ Math.floor(Math.random() * 256).toString() +')'
-                rgb.push(str)
-            }
-
-            const data = {
-              labels: [{% for p in clientsph %} '{{ p.hour}} horas',{% endfor %}],
-              datasets: [{
-                label: 'Clientes por hora',
-                data: [{% for p in clientsph %} {{ p.diners__sum }}, {% endfor %}],
-                backgroundColor: rgb,
-                hoverOffset: 4
-              }]};
-
-            const config = {
-              type: 'bar',
-              data: data,
-              options: {
-                scales: {
-                  y: {
-                    beginAtZero: false
-                  }
-                }
-              },
-            };
-            const myChart = new Chart(ctx,config);
-
-            var rgb2= [];
-            for(var i=0;i<{{ len3 }}; i++){
-                let str = 'rgb('+ Math.floor(Math.random() * 256).toString() +', ' + Math.floor(Math.random() * 256).toString() +', '+ Math.floor(Math.random() * 256).toString() +')'
-                rgb2.push(str)
-            }
-            hours = Array.from({length: {{max_stay_time.stay_hour__max}} + 1}, (x, i) => i.toString() + ' horas');
-
-            const data2 = {
-              labels: hours,
-              datasets: [{
-                label: 'Frecuencia de clientes por horas de estadía',
-                data: [{% for p in stay_time %} {{ p.diners__sum }} , {% endfor %}],
-                backgroundColor: rgb2,
-                hoverOffset: 4
-              }]};
-
-            const config2 = {
-              type: 'bar',
-              data: data2,
-              options: {
-                scales: {
-                  y: {
-                    beginAtZero: false
-                  }
-                }
-              },
-            };
-            const myChart2 = new Chart(ctx2,config2);
-        }
-
-        //else if(graph.toString() == ""){}
+                    const queryString = window.location.search;
+                    const urlParams = new URLSearchParams(queryString);
+                    const graph = urlParams.get('graph');
+                    const ctx = document.getElementById('myChart');
+                    const ctx2 = document.getElementById('myChart2');
+                    const title = document.getElementById('title');
+                    const selector = document.getElementById('selector');
+                    const box = document.getElementById('box');
+                    const details_body = document.getElementById('details_body');
+                    const details_head = document.getElementById('details_head');
 
 
-        </script>
-    </div>
-    </div>
-    <!--
-<div class="row mt-3 pt-3">
-    <div class="box" style="width:50%; height:50%">
-        <canvas id="myChart" ></canvas>
-        <script>
-        const ctx = document.getElementById('myChart');
-        const myChart = new Chart(ctx, {
-            type: 'bar',
-            data: {
-                labels: ['Red', 'Blue', 'Yellow', 'Green', 'Purple', 'Orange'],
-                datasets: [{
-                    label: '# of Votes',
-                    data: [12, 19, 3, 5, 2, 3],
-                    backgroundColor: [
-                        'rgba(255, 99, 132, 0.2)',
-                        'rgba(54, 162, 235, 0.2)',
-                        'rgba(255, 206, 86, 0.2)',
-                        'rgba(75, 192, 192, 0.2)',
-                        'rgba(153, 102, 255, 0.2)',
-                        'rgba(255, 159, 64, 0.2)'
-                    ],
-                    borderColor: [
-                        'rgba(255, 99, 132, 1)',
-                        'rgba(54, 162, 235, 1)',
-                        'rgba(255, 206, 86, 1)',
-                        'rgba(75, 192, 192, 1)',
-                        'rgba(153, 102, 255, 1)',
-                        'rgba(255, 159, 64, 1)'
-                    ],
-                    borderWidth: 1
-                }]
-            },
-            options: {
-                scales: {
-                    y: {
-                        beginAtZero: true
+                    function generate_rgb(len) {
+                        var rgb = [];
+                        for (var i = 0; i < len; i++) {
+                            let str = 'rgb(' + Math.floor(Math.random() * 256).toString() + ', ' + Math.floor(Math.random() * 256).toString() + ', ' + Math.floor(Math.random() * 256).toString() + ')'
+                            rgb.push(str);
+                        }
+                        return rgb;
                     }
-                }
-            }
-        });
-        </script>
-    </div>
-</div> -->
+
+                    function set_chart(data, title, chart) {
+                        const config = {
+                            type: 'bar',
+                            data: data,
+                            options: {
+                                responsive: false,
+                                scales: {
+                                    y: {
+                                        beginAtZero: true
+                                    }
+                                },
+                                plugins: {
+                                    title: {
+                                        display: true,
+                                        text: title,
+                                        font: {
+                                            size: 16
+                                        },
+                                        padding: 15,
+                                    },
+                                    legend: {
+                                        display: false,
+                                    },
+                                },
+                            }
+                        };
+                        if (chart == 1) {
+                            const myChart = new Chart(ctx, config);
+                        } else {
+                            const myChart2 = new Chart(ctx2, config);
+                        }
+
+
+                    }
+
+                    if (graph.toString() == "product") {
+                        box.innerHTML = ""
+                        title.innerHTML = 'Productos'
+
+                        //gráficos------------------------------------------
+                        var rgb = generate_rgb({{ len1 }})
+                        const data = {
+                            labels: [{% for p in product_name %}'{{ p.name }}',{% endfor %}],
+                            datasets: [{
+                                data: [{% for p in product_qtt %}'{{ p.qtt }}',{% endfor %}],
+                                backgroundColor: rgb,
+                                hoverOffset: 4
+                            }]
+                        };
+                        set_chart(data, 'Frecuencia de producto histórica', 1)
+
+                        const data2 = {
+                            labels: [{% for p in product_income %}'{{ p.name }}',{% endfor %}],
+                            datasets: [{
+                                data: [{% for p in product_income %}'{{ p.qtt }}',{% endfor %}],
+                                backgroundColor: rgb,
+                                hoverOffset: 4
+                            }]
+                        };
+                        set_chart(data2, 'Ingresos por producto histórico', 2)
+
+                        //detalles-------------------------------------------
+                        details_head.innerHTML = `<tr>
+                        <th style ='width:35%'> Id de venta </th>
+                        <th style='width:20%'>Categoría</th>
+                        <th style='width:20%'>Nombre</th>
+                        <th style='width:12%'>Precio</th>
+                        <th style='width:12%'>Cantidad</th>
+                    </tr>`
+                        details_body.innerHTML = `{% for i in products %}
+                            <tr>
+                            <td style = 'width:35%' > {{ i.sale_id }} </td>
+                            <td style='width:20%'>{{ i.category }}</td>
+                            <td style='width:20%'>{{ i.name }}</td>
+                            <td style='width:12%'>{{ i.price }}</td>
+                            <td style='width:12%'>{{ i.quantity }}</td>
+                            </tr>
+                        {% endfor %}`
+
+                    }
+                    else if (graph.toString() == "income") {
+                        selector.innerHTML = `<div class="whitebox" style="width: 100%;height: 240px;">
+                <p align="center" style="font-size: 20px; font-weight: bold; margin-bottom: 2px"> Selecciona el tipo de venta</p>
+                <hr class="solid" style="margin-bottom: 2px">
+                    <form action="" method="post">
+                        {% csrf_token %}
+                        <button class="btn" name="sale" value="all" align="center"style="font-size: 15px; margin: 2px !important; background-color: lightgray">Todas</button>
+                    {% csrf_token %}
+                        <button class="btn" name="sale" value="wrong" align="center"style="font-size: 15px; margin: 2px !important; background-color: lightgray">Cobro incorrecto</button>
+                    {% csrf_token %}
+                        <button class="btn" name="sale" value="right" align="center"style="font-size: 15px; margin: 2px !important; background-color: lightgray">Cobro correcto</button>
+                    </form>
+            </div>`
+                        title.innerHTML = 'Ingresos';
+                        var rgb = generate_rgb({{ len2 }});
+                        const data = {
+                            labels: [{% for p in income_month %} '{{ p.month}} - {{ p.year }}',{% endfor %}],
+                            datasets: [{
+                                data: [{% for p in income %} {{ p.income }}, {% endfor %}],
+                                backgroundColor: rgb,
+                                hoverOffset: 4
+                            }]
+                        };
+                        set_chart(data, 'Ingresos mensuales', 1)
+                        //
+                        var rgb2 = generate_rgb({{ len3 }})
+                        const data2 = {
+                            labels: [{% for p in avg_income_ppm %} '{{ p.type}}',{% endfor %}],
+                            datasets: [{
+                                data: [{% for p in avg_income_ppm %} {{ p.income }}, {% endfor %}],
+                                backgroundColor: rgb2,
+                                hoverOffset: 4
+                            }]
+                        };
+                        set_chart(data2, 'Frecuencia histórica por medio de pago', 2)
+
+                        //detalles-------------------------------------------
+                        details_head.innerHTML = `<tr>
+                        <th style ='width:48%'> Id de venta </th>
+                        <th style='width:25%'>Ingreso pagado</th>
+                        <th style='width:25%'>Ingreso a cobrar</th>
+                        <th style='width:25%'>Medio de pago</th>
+                    </tr>`
+                        details_body.innerHTML = `{% for i in total_income %}
+                            <tr>
+                            <td style = 'width:50%' > {{ i.sale_id }} </td>
+                            <td style='width:25%'>{{ i.sum }}</td>
+                            <td style='width:25%'>{{ i.right_amount }}</td>
+                            <td style='width:25%'>{{ i.type }}</td>
+                            </tr>
+                        {% endfor %}`
+                    }
+                    else if (graph.toString() == "client") {
+                        box.innerHTML = ""
+                        title.innerHTML = 'Clientes'
+                        var rgb = generate_rgb({{ len3 }});
+                        const data = {
+                            labels: [{% for p in clientsph %} '{{ p.hour}} horas',{% endfor %}],
+                            datasets: [{
+                                data: [{% for p in clientsph %} {{ p.diners__sum }}, {% endfor %}],
+                                backgroundColor: rgb,
+                                hoverOffset: 4
+                            }]
+                        };
+                        set_chart(data, 'Frecuencia de clientes promedio', 1);
+
+                        var rgb2 = generate_rgb({{ len3 }});
+                        hours = Array.from({length: {{max_stay_time.stay_hour__max}} +1}, (x, i) => i.toString() + ' horas');
+                        const data2 = {
+                            labels: hours,
+                            datasets: [{
+                                data: [{% for p in stay_time %} {{ p.diners__sum }} , {% endfor %}],
+                                backgroundColor: rgb2,
+                                hoverOffset: 4
+                            }]
+                        };
+                        set_chart(data2, 'Frecuencia de clientes por hora histórica', 2);
+                        //'sale_id', 'diners', 'stay_hour', 'total'
+                                            //detalles-------------------------------------------
+                        details_head.innerHTML = `<tr>
+                        <th style ='width:48%'> Id de venta </th>
+                        <th style='width:25%'>Comensales</th>
+                        <th style='width:25%'>Horas de estadía</th>
+                        <th style='width:25%'>Monto pagado</th>
+                    </tr>`
+                        details_body.innerHTML = `{% for i in clients %}
+                            <tr>
+                            <td style = 'width:50%' > {{ i.sale_id }} </td>
+                            <td style='width:25%'>{{ i.diners }}</td>
+                            <td style='width:25%'>{{ i.stay_hour }}</td>
+                            <td style='width:25%'>{{ i.total }}</td>
+                            </tr>
+                        {% endfor %}`
+                    }
+
+                </script>
 {% endblock %}
